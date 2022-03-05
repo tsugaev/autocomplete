@@ -1,11 +1,11 @@
 import Select from "./Select";
 
-function App() {
+const App = () => {
   return (
     <div className="App">
       <Select />
     </div>
   );
-}
+};
 
 export default App;
