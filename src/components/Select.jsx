@@ -1,32 +1,49 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import movies from "../movies.json";
-import MoviesList from "./moviesList";
+import MoviesList from "./MoviesList";
 import styles from "./select.module.css";
-import OutsideClickHandler from "react-outside-click-handler/esm/OutsideClickHandler";
+import OutsideClickHandler from "react-outside-click-handler";
+import { useDebounce } from '../useDebounce';
 
 const Select = () => {
-  const [popUp, setPopUp] = useState(false);
   const [text, setText] = useState("");
   const [select, setSelect] = useState(false);
+  const [searching, setSearching] = useState(false);
+
+  const debouncedSearchText = useDebounce(text, 1500);
+
+  console.log(debouncedSearchText);
 
   const handlePopUp = () => {
-    setPopUp(true);
-  };
-  const handleText = (e) => {
-    setText(e.target.value);
-    setSelect(false);
-  };
-  const handleMovieSelect = (e) => {
-    setText(e.target.innerText);
     setSelect(true);
   };
-  const handleOutsideClick = () => {
-    setPopUp(false);
+
+  const handleChangeText = (e) => {
+    setText(e.target.value);
   };
-  const filteredMovies = movies.filter((movie) =>
-    movie.title.toUpperCase().includes(text.toUpperCase())
+
+  const handleMovieSelect = (title) => {
+    setText(title);
+    setSelect(false);
+  };
+
+  const handleOutsideClick = () => {
+    setSelect(false);
+  };
+
+  const filteredMovies = useMemo(
+    () =>
+      movies.filter((movie) =>
+        movie.title.toUpperCase().includes(text.toUpperCase())
+      ),
+    [text]
   );
 
+  useEffect(() => {
+    if (debouncedSearchText) {
+      setSearching(true);
+    }
+  }, [debouncedSearchText])
   return (
     <div className={styles.main}>
       <OutsideClickHandler onOutsideClick={handleOutsideClick}>
@@ -34,16 +51,17 @@ const Select = () => {
           <input
             type="text"
             value={text}
-            onChange={handleText}
+            onChange={handleChangeText}
             onClick={handlePopUp}
             onBlur={handlePopUp}
             className={styles.input}
           />
         </div>
-        {popUp && !select && (
+        {select && (
           <MoviesList
             movies={filteredMovies}
-            handleMovieSelect={handleMovieSelect}
+            onMovieSelect={handleMovieSelect}
+            searching={searching}
           />
         )}
       </OutsideClickHandler>

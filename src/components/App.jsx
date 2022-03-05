@@ -1,11 +1,7 @@
 import Select from "./Select";
 
 const App = () => {
-  return (
-    <div className="App">
-      <Select />
-    </div>
-  );
+  return <Select />;
 };
 
 export default App;
